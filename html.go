@@ -6,73 +6,11 @@ const Template = `<!doctype html>
     <title>Wiki</title>
     <meta charset="utf-8" />
 
-    <style type="text/css">
-        body {
-            margin: 1rem;
-            font-family: georgia;
-            font-size: 0.9rem;
-        }
-
-        pre {
-            font-size: 1rem;
-            margin: 0;
-            padding 0;
-        }
-
-        ul {
-            list-style-type: square;
-            list-style-position: inside;
-            padding-left: 1rem;
-        }
-
-        hr {
-            height: 1px;
-            border: none;
-            border-bottom: 1px #eee solid;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-family: 'Helvetica Neue', georgia;
-            font-weight: 200;
-        }
-
-        .commit {
-            cursor: pointer;
-            background-color: #eee;
-            margin: 0.2rem 0;
-            padding: 0.2rem;
-        }
-
-        .highlight .gi > .x {
-            background-color: #eaffea;
-            color: #55a532;
-        }
-
-        .highlight .gd > .x {
-            background-color: #ffecec;
-            color: #bd2c00;
-        }
-
-        .highlight {
-            margin: 0.5rem 0;
-            border-left: 3px solid #eee;
-            padding-left: 0.5rem;
-        }
-
-        .date,
-        .hash,
-        .author,
-        .subject {
-            display: inline-block;
-            text-overflow: ellipsis;
-            margin: 0.1rem 0;
-        }
-    </style>
+      <link rel="stylesheet" type="text/css" href="/css/gollum.css" media="all">
+	  <link rel="stylesheet" type="text/css" href="/css/editor.css" media="all">
+	  <link rel="stylesheet" type="text/css" href="/css/dialog.css" media="all">
+	  <link rel="stylesheet" type="text/css" href="/css/template.css" media="all">
+	  <link rel="stylesheet" type="text/css" href="/css/print.css" media="print">
 
     {{ if .CustomCSS }}
     <link rel="stylesheet" href="/css/custom.css" type="text/css">
@@ -80,70 +18,69 @@ const Template = `<!doctype html>
 
 </head>
 <body>
-    <header>{{ .Title }}</header>
+    
 
-    <section>{{ .Body }}</section>
+<script>
+Mousetrap.bind(['e'], function( e ) {
+  e.preventDefault();
+  window.location = "/edit" + window.location.pathname;
+  return false;
+});
+</script>
+<div id="wiki-wrapper" class="page">
+<!--<div id="head">
+   <h1>1</h1>
 
-    <hr>
-
-    <footer class="commits">
-        {{ range .Commits }}
-        <div class="commit" data-hash="{{ .Hash }}" data-file="{{ .FileNoExt }}">
-            <span class="date">{{ .HumanDate }}</span> &middot;
-            <span class="author">{{ .Author }}</span> &middot;
-            <span class="subject">{{ .Subject }}</span>
-            <div class="diff"></div>
+ <ul class="actions">
+    <li class="minibutton">
+      <div id="searchbar">
+        <form action="/search" method="get" id="search-form">
+        <div id="searchbar-fauxtext">
+          <input type="text" name="q" id="search-query" value="Search&hellip;" autocomplete="off">
+          <a href="#" id="search-submit" title="Search this wiki">
+            <span>Search</span>
+          </a>
         </div>
-        {{ end}}
-    </footer>
+        </form>
+      </div>    </li>
+    <li class="minibutton"><a href="/"
+       class="action-home-page">Home</a></li>
+    <li class="minibutton"><a href="/pages"
+      class="action-all-pages">All</a></li>
+    <li class="minibutton"><a href="/fileview"
+    class="action-fileview">Files</a></li>
+      <li class="minibutton jaws">
+        <a href="#" id="minibutton-new-page">New</a></li>
+        <li class="minibutton jaws">
+          <a href="#" id="minibutton-rename-page">Rename</a></li>
+        <li class="minibutton"><a href="/edit/1"
+           class="action-edit-page">Edit</a></li>
+    <li class="minibutton"><a href="/history/1"
+       class="action-page-history">History</a></li>
+    <li class="minibutton"><a href="/latest_changes"
+       class="action-page-history">Latest Changes</a></li>
+  </ul>
 
-    <script>
-        (function() {
-            var commits = document.querySelectorAll('.commit');
+</div>-->
+<div id="wiki-content">
+<div class="">
+  <div id="wiki-body" class="gollum-markdown-content">
+    <div class="markdown-body">
+      
+		{{ .Body }}
+	
+    </div>
+  </div>
+  </div>
 
-            function closeDiffs(skipElement) {
-                var diffs = document.querySelectorAll('.diff');
-                for (var i = 0; i < diffs.length; i++) {
-                    if (skipElement && skipElement === diffs[i]) {
-                        continue;
-                    }
+</div>
 
-                    diffs[i].innerHTML = '';
-                }
-            }
+<!--<div id="footer">
+  <p id="last-edit"></p>
+</div>-->
 
-            function request(dataset, callback) {
-                var url = '/api/diff/' + dataset.hash + '/' + dataset.file;
-                var r = new XMLHttpRequest();
+</div>
 
-                r.onreadystatechange = function() {
-                    if (r.readyState === 4 && r.status === 200) {
-                        callback(r.responseText);
-                    }
-                };
 
-                r.open('GET', url, true);
-                r.send(null);
-            }
-
-            function onClick() {
-                var diff = this.querySelector('.diff');
-
-                if (diff.innerHTML === "") {
-                    request(this.dataset, function(response) {
-                        diff.innerHTML = response;
-                    });
-                } else {
-                    closeDiffs();
-                }
-
-                closeDiffs(diff);
-            }
-
-            for (var i = 0; i < commits.length; i++) {
-                commits[i].addEventListener('click', onClick);
-            }
-        })();
-    </script>
 </body>
 </html>`

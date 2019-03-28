@@ -11,6 +11,30 @@ import (
 
 const imageTypes = ".jpg .jpeg .png .gif"
 
+func GetFileInfos(baseDir, dir string) []string {
+	filteredMap := map[string]bool{
+		"css":  true,
+		"file": true,
+		".git": true,
+		"wiki": true,
+	}
+	var fileInfos []string
+	files, _ := ioutil.ReadDir(baseDir + "/" + dir)
+	for _, file := range files {
+		if file.IsDir() {
+			//fmt.Println(dir+"/"+file.Name())
+			if !filteredMap[file.Name()] {
+				fileInfos = append(fileInfos, file.Name())
+				fmt.Println(baseDir, file.Name())
+				fileInfos = append(fileInfos, GetFileInfos(baseDir, file.Name())...)
+			}
+		} else {
+			fileInfos = append(fileInfos, file.Name())
+		}
+	}
+	return fileInfos
+}
+
 func WikiHandler(w http.ResponseWriter, r *http.Request) {
 	filePath := r.URL.Path[1:]
 	if filePath == "" {
@@ -48,10 +72,12 @@ func WikiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	wiki := Wiki{
-		Markdown:  md,
-		CustomCSS: options.CustomCSS,
-		filepath:  fsPath,
-		template:  options.template,
+		Markdown:      md,
+		CustomCSS:     options.CustomCSS,
+		filepath:      fsPath,
+		template:      options.template,
+		indextemplate: options.indextemplate,
+		uri:           filePath,
 	}
 
 	wiki.Commits, err = Commits(filePath+".md", 5)

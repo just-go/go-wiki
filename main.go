@@ -26,9 +26,11 @@ var options struct {
 	Dir       string
 	Port      int
 	CustomCSS string
+	BaseDir   string
 
-	template *template.Template
-	git      bool
+	template      *template.Template
+	indextemplate *template.Template
+	git           bool
 }
 
 func main() {
@@ -38,6 +40,7 @@ func main() {
 
 	flag.IntVarP(&options.Port, "port", "p", 8080, "")
 	flag.StringVar(&options.CustomCSS, "custom-css", "", "")
+	flag.StringVar(&options.BaseDir, "baseDir", "", "")
 
 	flag.Parse()
 
@@ -53,6 +56,7 @@ func main() {
 	// Parse base template
 	var err error
 	options.template, err = template.New("base").Parse(Template)
+	options.indextemplate, err = template.New("base").Parse(IndexTemplate)
 	if err != nil {
 		log.Fatalln("Error parsing HTML template:", err)
 	}
@@ -76,6 +80,10 @@ func main() {
 		log.Println("No git repository found in directory")
 	}
 
+	http.HandleFunc("/css/", func(w http.ResponseWriter, r *http.Request) {
+		file := options.BaseDir + r.URL.Path
+		http.ServeFile(w, r, file)
+	})
 	http.Handle("/api/diff/", commonHandler(DiffHandler))
 	http.Handle("/", commonHandler(WikiHandler))
 

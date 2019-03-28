@@ -15,8 +15,10 @@ type Wiki struct {
 	Commits   []Commit
 	CustomCSS string
 
-	template *template.Template
-	filepath string
+	template      *template.Template
+	indextemplate *template.Template
+	filepath      string
+	uri           string
 }
 
 func (w Wiki) Title() string {
@@ -27,8 +29,16 @@ func (w Wiki) Title() string {
 }
 
 func (w *Wiki) Write(rw http.ResponseWriter) {
-	w.Body = template.HTML(blackfriday.MarkdownCommon(w.Markdown))
-	err := w.template.Execute(rw, w)
+	var err error
+
+	if w.uri == "index" {
+		w.Body = template.HTML(blackfriday.MarkdownCommon(w.Markdown))
+		err = w.indextemplate.Execute(rw, w)
+	} else {
+		w.Body = template.HTML(blackfriday.MarkdownCommon(w.Markdown))
+		err = w.template.Execute(rw, w)
+	}
+
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 	}
